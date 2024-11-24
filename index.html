@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calculator {
+            background: #fff;
+            width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .display {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            text-align: right;
+            position: relative;
+        }
+
+        .expression {
+            min-height: 20px;
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .result {
+            font-size: 36px;
+            margin-top: 5px;
+            word-wrap: break-word;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background: #eee;
+            padding: 1px;
+        }
+
+        .btn {
+            border: none;
+            outline: none;
+            padding: 15px 10px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #f5f5f5;
+        }
+
+        .btn.operator {
+            background: #f8f9fa;
+            color: #1a73e8;
+        }
+
+        .btn.function {
+            background: #f8f9fa;
+            color: #188038;
+        }
+
+        .btn.equals {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn.equals:hover {
+            background: #1557b0;
+        }
+
+        .btn.clear {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn.clear:hover {
+            background: #bb2d3b;
+        }
+
+        .btn.delete {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn.delete:hover {
+            background: #ffca2c;
+        }
+
+        .mode-toggle {
+            display: flex;
+            padding: 10px;
+            background: #f8f9fa;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mode-btn {
+            border: none;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .memory-display {
+            font-size: 12px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="mode-toggle">
+            <button class="mode-btn active" onclick="setMode('deg')">DEG</button>
+            <button class="mode-btn" onclick="setMode('rad')">RAD</button>
+            <button class="mode-btn" onclick="setMode('grad')">GRAD</button>
+        </div>
+        <div class="display">
+            <div class="memory-display" id="memoryDisplay"></div>
+            <div class="expression" id="expression"></div>
+            <div class="result" id="result">0</div>
+        </div>
+        <div class="buttons">
+            <!-- Row 1 -->
+            <button class="btn clear" onclick="clearAll()">AC</button>
+            <button class="btn delete" onclick="deleteLastChar()">DEL</button>
+            <button class="btn function" onclick="addToMemory()">M+</button>
+            <button class="btn function" onclick="subtractFromMemory()">M-</button>
+            <button class="btn function" onclick="storeInMemory()">MS</button>
+            
+            <!-- Rest of the buttons remain the same -->
+            <!-- Row 2 -->
+            <button class="btn function" onclick="insertMathConstant('π')">π</button>
+            <button class="btn function" onclick="insertMathConstant('e')">e</button>
+            <button class="btn operator" onclick="factorial()">n!</button>
+            <button class="btn operator" onclick="insertOperator('(')">(</button>
+            <button class="btn operator" onclick="insertOperator(')')">)</button>
+            
+            <!-- Row 3 -->
+            <button class="btn function" onclick="insertFunction('sin')">sin</button>
+            <button class="btn function" onclick="insertFunction('cos')">cos</button>
+            <button class="btn function" onclick="insertFunction('tan')">tan</button>
+            <button class="btn operator" onclick="insertOperator('^')">x^y</button>
+            <button class="btn operator" onclick="sqrt()">√</button>
+            
+            <!-- Row 4 -->
+            <button class="btn function" onclick="insertFunction('asin')">sin⁻¹</button>
+            <button class="btn function" onclick="insertFunction('acos')">cos⁻¹</button>
+            <button class="btn function" onclick="insertFunction('atan')">tan⁻¹</button>
+            <button class="btn operator" onclick="insertFunction('log')">log</button>
+            <button class="btn operator" onclick="insertFunction('ln')">ln</button>
+            
+            <!-- Row 5 -->
+            <button class="btn" onclick="insertNumber(7)">7</button>
+            <button class="btn" onclick="insertNumber(8)">8</button>
+            <button class="btn" onclick="insertNumber(9)">9</button>
+            <button class="btn operator" onclick="insertOperator('/')">/</button>
+            <button class="btn operator" onclick="percentage()">%</button>
+            
+            <!-- Row 6 -->
+            <button class="btn" onclick="insertNumber(4)">4</button>
+            <button class="btn" onclick="insertNumber(5)">5</button>
+            <button class="btn" onclick="insertNumber(6)">6</button>
+            <button class="btn operator" onclick="insertOperator('*')">×</button>
+            <button class="btn operator" onclick="mod()">mod</button>
+            
+            <!-- Row 7 -->
+            <button class="btn" onclick="insertNumber(1)">1</button>
+            <button class="btn" onclick="insertNumber(2)">2</button>
+            <button class="btn" onclick="insertNumber(3)">3</button>
+            <button class="btn operator" onclick="insertOperator('-')">-</button>
+            <button class="btn function" onclick="abs()">|x|</button>
+            
+            <!-- Row 8 -->
+            <button class="btn" onclick="insertNumber(0)">0</button>
+            <button class="btn" onclick="insertDecimal()">.</button>
+            <button class="btn operator" onclick="toggleSign()">±</button>
+            <button class="btn operator" onclick="insertOperator('+')">+</button>
+            <button class="btn equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentExpression = '';
+        let currentResult = '0';
+        let memory = 0;
+        let angleMode = 'deg';
+        let lastAnswer = 0;
+
+        const expressionDisplay = document.getElementById('expression');
+        const resultDisplay = document.getElementById('result');
+        const memoryDisplay = document.getElementById('memoryDisplay');
+
+        function updateDisplay() {
+            expressionDisplay.textContent = currentExpression;
+            resultDisplay.textContent = currentResult;
+            memoryDisplay.textContent = memory !== 0 ? 'M' : '';
+        }
+
+        // New function for deleting last character
+        function deleteLastChar() {
+            if (currentExpression.length > 0) {
+                currentExpression = currentExpression.slice(0, -1);
+                updateDisplay();
+            }
+        }
+
+        // Modified clearAll function
+        function clearAll() {
+            currentExpression = '';
+            currentResult = '0';
+            updateDisplay();
+        }
+
+        // Rest of the JavaScript functions remain the same
+        function insertNumber(num) {
+            if (currentResult !== '0' && currentExpression === '') {
+                clearAll();
+            }
+            currentExpression += num;
+            updateDisplay();
+        }
+
+        function insertDecimal() {
+            if (!currentExpression.includes('.')) {
+                currentExpression += currentExpression === '' ? '0.' : '.';
+                updateDisplay();
+            }
+        }
+
+        function insertOperator(operator) {
+            if (currentExpression === '' && currentResult !== '0') {
+                currentExpression = currentResult;
+            }
+            currentExpression += operator;
+            updateDisplay();
+        }
+
+        function insertFunction(func) {
+            currentExpression += func + '(';
+            updateDisplay();
+        }
+
+        function insertMathConstant(constant) {
+            switch(constant) {
+                case 'π':
+                    currentExpression += Math.PI;
+                    break;
+                case 'e':
+                    currentExpression += Math.E;
+                    break;
+            }
+            updateDisplay();
+        }
+
+        function setMode(mode) {
+            angleMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase() === mode) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function toRadians(angle) {
+            switch(angleMode) {
+                case 'deg':
+                    return angle * Math.PI / 180;
+                case 'grad':
+                    return angle * Math.PI / 200;
+                default:
+                    return angle;
+            }
+        }
+
+        function fromRadians(angle) {
+            switch(angleMode) {
+                case 'deg':
+                    return angle * 180 / Math.PI;
+                case 'grad':
+                    return angle * 200 / Math.PI;
+                default:
+                    return angle;
+            }
+        }
+
+        function factorial() {
+            if (currentExpression === '') {
+                currentExpression = currentResult;
+            }
+            const num = parseFloat(currentExpression);
+            if (Number.isInteger(num) && num >= 0) {
+                let result = 1;
+                for (let i = 2; i <= num; i++) {
+                    result *= i;
+                }
+                currentResult = result.toString();
+                currentExpression = '';
+                updateDisplay();
+            }
+        }
+
+        function sqrt() {
+            if (currentExpression === '') {
+                currentExpression = currentResult;
+            }
+            const num = parseFloat(currentExpression);
+            if (num >= 0) {
+                currentResult = Math.sqrt(num).toString();
+                currentExpression = '';
+                updateDisplay();
+            }
+        }
+
+        function abs() {
+            if (currentExpression === '') {
+                currentExpression = currentResult;
+            }
+            currentResult = Math.abs(parseFloat(currentExpression)).toString();
+            currentExpression = '';
+            updateDisplay();
+        }
+
+        function percentage() {
+            if (currentExpression === '') {
+                currentExpression = currentResult;
+            }
+            currentResult = (parseFloat(currentExpression) / 100).toString();
+            currentExpression = '';
+            updateDisplay();
+        }
+
+        function mod() {
+            currentExpression += ' % ';
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            if (currentExpression === '') {
+                currentExpression = currentResult;
+            }
+            if (currentExpression.startsWith('-')) {
+                currentExpression = currentExpression.substring(1);
+            } else {
+                currentExpression = '-' + currentExpression;
+            }
+            updateDisplay();
+        }
+
+        // Memory functions
+        function clearMemory() {
+            memory = 0;
+            updateDisplay();
+        }
+
+        function recallMemory() {
+            currentExpression = memory.toString();
+            updateDisplay();
+        }
+
+        function addToMemory() {
+            if (currentExpression === '') {
+                memory += parseFloat(currentResult);
+            } else {
+                memory += parseFloat(currentExpression);
+            }
+            updateDisplay();
+        }
+
+        function subtractFromMemory() {
+            if (currentExpression === '') {
+                memory -= parseFloat(currentResult);
+            } else {
+                memory -= parseFloat(currentExpression);
+            }
+            updateDisplay();
+        }
+
+        function storeInMemory() {
+            if (currentExpression === '') {
+                memory = parseFloat(currentResult);
+            } else {
+                memory = parseFloat(currentExpression);
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                let expression = currentExpression;
+                
+                // Handle trigonometric functions
+                expression = expression.replace(/sin\(/g, `Math.sin(${angleMode === 'deg' ? 'Math.PI/180*' : ''}`);
+                expression = expression.replace(/cos\(/g, `Math.cos(${angleMode === 'deg' ? 'Math.PI/180*' : ''}`);
+                expression = expression.replace(/tan\(/g, `Math.tan(${angleMode === 'deg' ? 'Math.PI/180*' : ''}`);
+                
+                // Handle inverse trig functions
+                expression = expression.replace(/asin\(/g, `${angleMode === 'deg' ? '180/Math.PI*' : ''}Math.asin(`);
+                expression = expression.replace(/acos\(/g, `${angleMode === 'deg' ? '180/Math.PI*' : ''}Math.acos(`);
+                expression = expression.replace(/atan\(/g, `${angleMode === 'deg' ? '180/Math.PI*' : ''}Math.atan(`);
+                
+                // Handle logarithms
+                expression = expression.replace(/log\(/g, 'Math.log10(');
+                expression = expression.replace(/ln\(/g, 'Math.log(');
+                
+                // Handle power
+                expression = expression.replace(/\^/g, '**');
+                
+                // Calculate
+                currentResult = eval(expression).toString();
+                lastAnswer = parseFloat(currentResult);
+                currentExpression = '';
+                updateDisplay();
+            } catch (error) {
+                currentResult = 'Error';
+                updateDisplay();
+            }
+        }
+
+        // Initialize the calculator
+        updateDisplay();
+    </script>
+</body>
+</html>
